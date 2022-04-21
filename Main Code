@@ -1,0 +1,357 @@
+#include "SD.h"
+#define SD_ChipSelectPin 10
+#include "TMRpcm.h"
+#include "SPI.h"
+
+const int flexPin = A1;
+const int flexPin2 = A2;
+const int flexPin3 = A3;
+const int flexPin4 = A4;
+const int flexPin5 = A5;
+
+const float VCC = 5;      // voltage at Ardunio 5V line
+const float R_DIV = 10000.0;  // resistor used to create a voltage divider
+
+const float flatResistance = 21000.0; // resistance when flat
+const float bendResistance = 5500.0;  // resistance at 90 deg
+
+const float flatResistance2 = 32000.0; // resistance when flat
+const float bendResistance2 = 4300.0;  // resistance at 90 deg
+
+const float flatResistance3 = 28000.0; // resistance when flat
+const float bendResistance3 = 5500.0;  // resistance at 90 deg
+
+const float flatResistance4 = 22000.0; // resistance when flat
+const float bendResistance4 = 6000.0;  // resistance at 90 deg
+
+const float flatResistance5 = 23000.0; // resistance when flat
+const float bendResistance5 = 3000.0;  // resistance at 90 deg
+
+int status_1 = 1;
+int status_2 = 1;
+int status_3 = 1;
+int status_4 = 1;
+int status_5 = 1;
+
+TMRpcm tmrpcm;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(flexPin, INPUT);
+  pinMode(flexPin2, INPUT);
+  pinMode(flexPin3, INPUT);
+  pinMode(flexPin4, INPUT);
+  pinMode(flexPin5, INPUT);
+
+  tmrpcm.speakerPin=9;
+
+  if(!SD.begin(SD_ChipSelectPin))
+  {
+  Serial.println("SD fail");
+  return;
+  }
+
+  tmrpcm.setVolume(7);
+  
+}
+
+void loop() {
+
+  int v1 = 45;
+  int v2 = 90;
+  int v3 = 98;
+  int v4 = 85;
+  int v5 = 23;
+
+ 
+  int ADCflex = analogRead(flexPin);
+  float Vflex = ADCflex * VCC / 1023.0;
+  float Rflex = R_DIV * (VCC / Vflex - 1.0);
+  //Serial.println("Resistance: " + String(Rflex) + " ohms");
+
+  int ADCflex2 = analogRead(flexPin2);
+  float Vflex2 = ADCflex2 * VCC / 1023.0;
+  float Rflex2 = R_DIV * (VCC / Vflex2 - 1.0);
+  //Serial.println("Resistance: " + String(Rflex2) + " ohms");
+
+  int ADCflex3 = analogRead(flexPin3);
+  float Vflex3 = ADCflex3 * VCC / 1023.0;
+  float Rflex3 = R_DIV * (VCC / Vflex3 - 1.0);
+  //Serial.println("Resistance: " + String(Rflex3) + " ohms");
+
+  int ADCflex4 = analogRead(flexPin4);
+  float Vflex4 = ADCflex4 * VCC / 1023.0;
+  float Rflex4 = R_DIV * (VCC / Vflex4 - 1.0);
+  //Serial.println("Resistance: " + String(Rflex4 + " ohms");
+
+  int ADCflex5 = analogRead(flexPin5);
+  float Vflex5 = ADCflex5 * VCC / 1023.0;
+  float Rflex5 = R_DIV * (VCC / Vflex5 - 1.0);
+  //Serial.println("Resistance: " + String(Rflex5) + " ohms");
+
+  // Use the calculated resistance to estimate the sensor's bend angle:
+  float angle = map(Rflex, flatResistance, bendResistance, 0, 90.0);
+  float angle2 = map(Rflex2, flatResistance2, bendResistance2, 0, 90.0);
+  float angle3 = map(Rflex3, flatResistance3, bendResistance3, 0, 90.0);
+  float angle4 = map(Rflex4, flatResistance4, bendResistance4, 0, 90.0);
+  float angle5 = map(Rflex5, flatResistance5, bendResistance5, 0, 90.0);
+  Serial.println("Bend 1: " + String(angle) + " degrees");
+  Serial.println("Bend 2: " + String(angle2) + " degrees");
+  Serial.println("Bend 3: " + String(angle3) + " degrees");
+  Serial.println("Bend 4: " + String(angle4) + " degrees");
+  Serial.println("Bend 5: " + String(angle5) + " degrees");
+  Serial.println();
+
+
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+
+  if (angle < v1 and angle2 < v2 and angle3 < v3 and angle4 < v4 and angle5 < v5 and status_1 == 1 and status_2 == 1 and status_3 == 1 and status_4 == 1 and status_5 == 1) {
+    tmrpcm.play("06.wav");
+    status_1 = 0;
+    status_2 = 0;
+    status_3 = 0;
+    status_4 = 0;
+    status_5 = 0;
+  } 
+
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+
+  if (angle < v1 and angle2 < v2 and angle3 < v3 and angle4 < v4 and status_1 == 1 and status_2 == 1 and status_3 == 1 and status_4 == 1) {
+    tmrpcm.play("29.wav");
+    status_1 = 0;
+    status_2 = 0;
+    status_3 = 0;
+    status_4 = 0;
+  }
+
+  if (angle < v1 and angle2 < v2 and angle3 < v3 and angle5 < v5 and status_1 == 1 and status_2 == 1 and status_3 == 1 and status_5 == 1) {
+    tmrpcm.play("28.wav");
+    status_1 = 0;
+    status_2 = 0;
+    status_3 = 0;
+    status_5 = 0;
+  }
+
+  if (angle2 < v2 and angle3 < v3 and angle4 < v4 and angle5 < v5 and status_2 == 1 and status_3 == 1 and status_4 == 1 and status_5 == 1) {
+    tmrpcm.play("27.wav");
+    status_2 = 0;
+    status_3 = 0;
+    status_4 = 0;
+    status_5 = 0;
+  }
+
+  if (angle < v1 and angle3 < v3 and angle4 < v4 and angle5 < v5 and status_1 == 1 and status_3 == 1 and status_4 == 1 and status_5 == 1) {
+    tmrpcm.play("26.wav");
+    status_1 = 0;
+    status_3 = 0;
+    status_4 = 0;
+    status_5 = 0;
+  }
+
+  if (angle < v1 and angle2 < v2 and angle4 < v4 and angle5 < v5 and status_1 == 1 and status_3 == 1 and status_4 == 1 and status_5 == 1) {
+    tmrpcm.play("25.wav");
+    status_1 = 0;
+    status_2 = 0;
+    status_4 = 0;
+    status_5 = 0;
+  }
+
+
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+
+
+  if (angle < v1 and angle2 < v2 and angle3 < v3 and status_1 == 1 and status_2 == 1 and status_3 == 1) {
+    tmrpcm.play("24.wav");
+    status_1 = 0;
+    status_2 = 0;
+    status_3 = 0;
+  }
+
+  if (angle < v1 and angle2 < v2 and angle4 < v4 and status_1 == 1 and status_2 == 1 and status_4 == 1) {
+    tmrpcm.play("23.wav");
+    status_1 = 0;
+    status_2 = 0;
+    status_4 = 0;
+  }
+
+  if (angle < v1 and angle2 < v2 and angle5 < v5 and status_1 == 1 and status_2 == 1 and status_5 == 1) {
+    tmrpcm.play("22.wav");
+    status_1 = 0;
+    status_2 = 0;
+    status_5= 0;
+  }
+
+  if (angle < v1 and angle3 < v3 and angle4 < v4 and status_1 == 1 and status_3 == 1 and status_4 == 1) {
+    tmrpcm.play("21.wav");
+    status_1 = 0;
+    status_3 = 0;
+    status_4 = 0;
+  }
+
+  if (angle < v1 and angle3 < v3 and angle5 < v5 and status_1 == 1 and status_3 == 1 and status_5 == 1) {
+    tmrpcm.play("20.wav");
+    status_1 = 0;
+    status_3 = 0;
+    status_5 = 0;
+  }
+
+  if (angle2 < v2 and angle3 < v3 and angle4 < v4 and status_2 == 1 and status_3 == 1 and status_4 == 1) {
+    tmrpcm.play("19.wav");
+    status_2 = 0;
+    status_3 = 0;
+    status_4 = 0;
+  }
+
+  if (angle2 < v2 and angle3 < v3 and angle5 < v5 and status_2 == 1 and status_3 == 1 and status_5 == 1) {
+    tmrpcm.play("18.wav");
+    status_2 = 0;
+    status_3 = 0;
+    status_5 = 0;
+  }
+
+  if (angle3 < v3 and angle4 < v4 and angle5 < v5 and status_3 == 1 and status_4 == 1 and status_5 == 1) {
+    tmrpcm.play("17.wav");
+    status_3 = 0;
+    status_4 = 0;
+    status_5 = 0;
+  }
+
+  if (angle < v1 and angle4 < v4 and angle5 < v5 and status_1 == 1 and status_4 == 1 and status_5 == 1) {
+    tmrpcm.play("16.wav");
+    status_1 = 0;
+    status_4 = 0;
+    status_5 = 0;
+  }
+
+
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+
+  if (angle < v1 and angle2 < v2 and status_1 == 1 and status_2 == 1) {
+    tmrpcm.play("15.wav");
+    status_1 = 0;
+    status_2 = 0;
+  }
+
+  if (angle < v1 and angle3 < v3 and status_1 == 1 and status_3 == 1) {
+    tmrpcm.play("14.wav");
+    status_1 = 0;
+    status_3 = 0;
+  }
+
+  if (angle < v1 and angle4 < v4 and status_1 == 1 and status_4 == 1) {
+    tmrpcm.play("13.wav");
+    status_1 = 0;
+    status_4 = 0;
+  }
+
+  if (angle < v1 and angle5 < v5 and status_1 == 1 and status_5 == 1) {
+    tmrpcm.play("12.wav");
+    status_1 = 0;
+    status_5 = 0;
+  }
+
+  if (angle2 < v2 and angle3 < v3 and status_2 == 1 and status_3 == 1) {
+    tmrpcm.play("11.wav");
+    status_2 = 0;
+    status_3 = 0;
+  }
+
+  if (angle2 < v2 and angle4 < v4 and status_2 == 1 and status_4 == 1) {
+    tmrpcm.play("10.wav");
+    status_2 = 0;
+    status_4 = 0;
+  }
+
+  if (angle2 < v2 and angle3 < v5 and status_2 == 1 and status_5 == 1) {
+    tmrpcm.play("09.wav");
+    status_2 = 0;
+    status_5 = 0;
+  }
+
+  if (angle3 < v3 and angle4 < v4 and status_3 == 1 and status_4 == 1) {
+    tmrpcm.play("08.wav");
+    status_3 = 0;
+    status_4 = 0;
+  }
+
+  if (angle3 < v3 and angle5 < v5 and status_3 == 1 and status_5 == 1) {
+    tmrpcm.play("07.wav");
+    status_3 = 0;
+    status_5 = 0;
+  }
+
+  if (angle4 < v4 and angle5 < v5 and status_4 == 1 and status_5 == 1) {
+    tmrpcm.play("06.wav");
+    status_4 = 0;
+    status_5 = 0;
+  }
+
+
+  //---------------------------------------------------------------------------------
+  //---------------------------------------------------------------------------------
+  //---------------------------------------------------------------------------------
+  
+  if (angle < v1 and status_1 == 1) {
+    tmrpcm.play("05.wav");
+    status_1 = 0;
+  }
+
+  if (angle2 < v2 and status_2 == 1) {
+    tmrpcm.play("04.wav");
+    status_2 = 0;
+  }
+
+  if (angle3 < v3 and status_3 == 1) {
+    tmrpcm.play("03.wav");
+    status_3 = 0;
+  }
+
+  if (angle4 < v4 and status_4 == 1) {
+    tmrpcm.play("02.wav");
+    status_4 = 0;
+  }
+
+  if (angle5 < v5 and status_5 == 1) {
+    tmrpcm.play("01.wav");
+    status_5 = 0;
+  }
+
+  //---------------------------------------------------------------------------------
+  //---------------------------------------------------------------------------------
+  //---------------------------------------------------------------------------------
+
+  if (angle5 > v5) {
+    status_5 = 1;
+  }
+
+  if (angle4 > v4) {
+    status_4 = 1;
+  }
+
+  if (angle3 > v3) {
+    status_3 = 1;
+  }
+
+  if (angle2 > v2) {
+    status_2 = 1;
+  }
+
+  if (angle >= v1) {
+    status_1 = 1;
+  }
+
+  //---------------------------------------------------------------------------------
+  //---------------------------------------------------------------------------------
+  //---------------------------------------------------------------------------------
+
+  delay(90);
+
+}
